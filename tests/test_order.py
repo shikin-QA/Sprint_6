@@ -1,6 +1,8 @@
 import allure
 import pytest
 
+from config import BASE_URL
+from data.order_data import ORDER_BOTTOM_DATA, ORDER_TOP_DATA
 from pages.main_page import MainPage
 from pages.order_page import OrderPage
 
@@ -11,12 +13,7 @@ class TestOrder:
     @allure.title("Заказ через верхнюю кнопку: {name} {surname}")
     @pytest.mark.parametrize(
         "name, surname, address, metro, phone, date, color",
-        [
-            ("Иван", "Иванов", "Москва, Ленина 1", "Черкизовская",
-             "+79001234567", "15.05.2025", "black"),
-            ("Пётр", "Петров", "Москва, Тверская 5", "Сокольники",
-             "+79007654321", "20.06.2025", "grey"),
-        ]
+        ORDER_TOP_DATA,
     )
     def test_order_via_top_button(
         self, driver, name, surname, address, metro, phone, date, color
@@ -37,12 +34,7 @@ class TestOrder:
     @allure.title("Заказ через нижнюю кнопку: {name} {surname}")
     @pytest.mark.parametrize(
         "name, surname, address, metro, phone, date, color",
-        [
-            ("Анна", "Смирнова", "Москва, Арбат 10", "Смоленская",
-             "+79001112233", "18.05.2025", "black"),
-            ("Олег", "Кузнецов", "Москва, Пресня 8", "Выставочная",
-             "+79004445566", "22.06.2025", "grey"),
-        ]
+        ORDER_BOTTOM_DATA,
     )
     def test_order_via_bottom_button(
         self, driver, name, surname, address, metro, phone, date, color
@@ -69,24 +61,17 @@ class TestLogos:
         main = MainPage(driver)
         main.open_main()
         main.click_scooter_logo()
-        assert main.URL in driver.current_url
+        main.wait_for_url_contains(BASE_URL)
+        assert BASE_URL in main.get_current_url()
 
     @allure.title("Клик по логотипу Яндекса открывает Дзен в новой вкладке")
     def test_yandex_logo_opens_dzen(self, driver):
         main = MainPage(driver)
         main.open_main()
 
-        original_tab = driver.current_window_handle
+        original_handle = main.get_current_window_handle()
         main.click_yandex_logo()
+        main.switch_to_new_tab(original_handle)
+        main.wait_for_url_contains("dzen.ru")
 
-        # ждём появления новой вкладки
-        import time
-        time.sleep(2)
-
-        tabs = driver.window_handles
-        assert len(tabs) > 1
-
-        new_tab = [t for t in tabs if t != original_tab][0]
-        driver.switch_to.window(new_tab)
-        driver.implicitly_wait(5)
-        assert "dzen.ru" in driver.current_url
+        assert "dzen.ru" in main.get_current_url()

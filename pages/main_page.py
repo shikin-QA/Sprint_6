@@ -1,58 +1,38 @@
-from selenium.webdriver.common.by import By
-
+from config import BASE_URL
+from locators.main_page_locators import MainPageLocators as L
 from pages.base_page import BasePage
 
 
 class MainPage(BasePage):
-    URL = "https://qa-scooter.praktikum-services.ru/"
-
-    ORDER_TOP_BUTTON = (By.XPATH, "(//button[text()='Заказать'])[1]")
-    ORDER_BOTTOM_BUTTON = (By.XPATH, "(//button[text()='Заказать'])[2]")
-
-    SCOOTER_LOGO = (By.XPATH, "//a[contains(@class, 'Header_LogoScooter')]")
-    YANDEX_LOGO = (By.XPATH, "//a[contains(@class, 'Header_LogoYandex')]")
-
-    COOKIE_BUTTON = (By.ID, "rcc-confirm-button")
-
-    FAQ_QUESTIONS = (By.XPATH, "//div[contains(@class, 'accordion__button')]")
-    FAQ_ANSWERS = (By.XPATH, "//div[contains(@class, 'accordion__panel')]")
-
     def __init__(self, driver):
-        super().__init__(driver, self.URL)
+        super().__init__(driver, BASE_URL)
 
     def open_main(self):
         self.open()
         self.accept_cookies()
 
     def accept_cookies(self):
-        buttons = self.driver.find_elements(*self.COOKIE_BUTTON)
+        buttons = self.find_all_optional(L.COOKIE_BUTTON)
         if buttons:
             buttons[0].click()
 
     def click_order_top(self):
-        self.click(self.ORDER_TOP_BUTTON)
+        self.click(L.ORDER_TOP_BUTTON)
 
     def click_order_bottom(self):
-        self.scroll_to(self.ORDER_BOTTOM_BUTTON)
-        self.click(self.ORDER_BOTTOM_BUTTON)
+        self.scroll_to(L.ORDER_BOTTOM_BUTTON)
+        self.click(L.ORDER_BOTTOM_BUTTON)
 
     def click_faq_question(self, index):
-        questions = self.driver.find_elements(*self.FAQ_QUESTIONS)
-        self.driver.execute_script(
-            "arguments[0].scrollIntoView({block: 'center'});", questions[index]
-        )
-        questions[index].click()
+        questions = self.find_all(L.FAQ_QUESTIONS)
+        self.scroll_and_click(questions[index])
 
     def get_faq_answer_text(self, index):
-        answers = self.driver.find_elements(*self.FAQ_ANSWERS)
+        answers = self.find_all(L.FAQ_ANSWERS)
         return answers[index].text
 
-    def get_faq_question_text(self, index):
-        questions = self.driver.find_elements(*self.FAQ_QUESTIONS)
-        return questions[index].text
-
     def click_scooter_logo(self):
-        self.click(self.SCOOTER_LOGO)
+        self.click(L.SCOOTER_LOGO)
 
     def click_yandex_logo(self):
-        self.click(self.YANDEX_LOGO)
+        self.click(L.YANDEX_LOGO)
